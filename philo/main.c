@@ -40,6 +40,10 @@ pthread_join: like a wait function for threads
 pthread_mutex_lock + unlock (mutual exclusive):
 - when a thread has this, it makes sure that no other thread is going to execute
 - preventing race conditions
+
+deadlocks:
+- when you try and lock a mutex twice
+- keep in mind of the order in which you lock and unlock the mutexes
 */
 
 int main(int ac, char **av)
