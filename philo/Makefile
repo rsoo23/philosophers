@@ -15,9 +15,8 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=address -fdiagnostics-color=always -g3
 RM = rm -rf
 
-SRCS_DIR = philo/
-SRCS = 
-SRCS_CFILES = $(addprefix $(SRCS_DIR), $(addsuffix .c, $(SRCS)))
+SRCS = main input_check philo_states
+SRCS_CFILES = $(addsuffix .c, $(SRCS))
 OBJS = $(SRCS_CFILES:.c=.o)
 
 %.o: %.c

@@ -85,7 +85,7 @@ int	input_check_and_assign(char **av, t_info *info)
 	info = malloc(sizeof(t_info));
 	if (!info)
 		return (0);
-	info->philo_num = (int)ft_atoi_long(av[1]);
+	info->ph_num = (int)ft_atoi_long(av[1]);
 	info->t_die = (int)ft_atoi_long(av[2]);
 	info->t_eat = (int)ft_atoi_long(av[3]);
 	info->t_sleep = (int)ft_atoi_long(av[4]);
