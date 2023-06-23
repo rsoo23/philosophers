@@ -49,7 +49,7 @@ static int	check_if_all_digits(char **av)
 	int	i;
 	int	j;
 
-	i = -1;
+	i = 0;
 	while (av[++i])
 	{
 		j = -1;
@@ -81,9 +81,6 @@ int	input_check_and_assign(char **av, t_info *info)
 	if (!check_if_all_digits(av))
 		return (0);
 	if (!check_num_size(av))
-		return (0);
-	info = malloc(sizeof(t_info));
-	if (!info)
 		return (0);
 	info->ph_num = (int)ft_atoi_long(av[1]);
 	info->t_die = (int)ft_atoi_long(av[2]);

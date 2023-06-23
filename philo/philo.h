@@ -34,15 +34,22 @@ typedef struct s_info
 	int				t_eat;
 	int				t_sleep;
 	int				must_eat_num;
-	long long		time;
 	pthread_mutex_t	fork[200];
 	t_ph			philo[200];
 	int				ph_i;
+	long long		st_time;
+	long long		cur_time;
 }   t_info;
+
+// main.c
+void	current_timestamp(t_info *info);
 
 // input_check.c
 int		input_check_and_assign(char **av, t_info *info);
 
 // philo_states.c
+void	philo_eat(t_info *info);
+void	philo_sleep(t_info *info);
+void	philo_think(t_info *info);
 
 #endif

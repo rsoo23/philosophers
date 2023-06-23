@@ -12,7 +12,7 @@
 
 #include "philo.h"
 
-// gcc -Wall -Wextra -Werror -pthread main.c
+// gcc -Wall -Wextra -Werror -pthread *.c
 
 /*
 pthread_join:
@@ -45,60 +45,90 @@ deadlocks:
 - keep in mind of the order in which you lock and unlock the mutexes
 */
 
+void	init_timestamp(t_info *info)
+{
+	struct timeval	start;
+
+	gettimeofday(&(start), NULL);
+	info->st_time = (long long)start.tv_sec * 1000 + start.tv_usec / 1000;
+	printf("%lld\n\n", info->st_time);
+}
 
 void	*routine(void *info)
 {
 	t_info	*in;
-	
+
 	in = (t_info *)(info);
-	while (1)
+	printf("%d, %d, %d, %d\n", in->ph_num, in->t_die, in->t_eat, in->t_sleep);
+	init_timestamp(in);
+	printf("routine for philo %d\n\n", in->ph_i);
+	// while (1)
+	// {
+	// 	printf("philo %d has state %c\n", in->ph_i, in->philo[in->ph_i].state);
+	// 	if (in->philo[in->ph_i].state == 'e')
+	// 		philo_eat(in);
+	// 	else if (in->philo[in->ph_i].state == 's')
+	// 		philo_sleep(in);
+	// 	else if (in->philo[in->ph_i].state == 't')
+	// 		philo_think(in);
+	// 	// if (in->must_eat_num == in->philo[in->ph_i].eat_num)
+	// 	// 	return (NULL);
+	// }
+	return (NULL);
+}
+
+
+void	init_philo(t_info *info)
+{
+	info->ph_i = -1;
+	while (++info->ph_i < info->ph_num)
 	{
-		if (in->philo[in->ph_i].state = 'e')
-			philo_eat(in);
-		else if (in->philo[in->ph_i].state = 's')
-			philo_sleep(in);
-		else if (in->philo[in->ph_i].state = 't')
-			philo_think(in);
+		info->philo[info->ph_i].state = 'e';
+		info->philo[info->ph_i].eat_num = 0;
+		if (pthread_mutex_init(&info->fork[info->ph_i], NULL))
+			return ;
+		printf("fork %d is created\n\n", info->ph_i);
+	}
+	info->ph_i = -1;
+	while (++info->ph_i < info->ph_num)
+	{
+		if (pthread_create(&info->philo[info->ph_i].th, NULL, &routine, (void *)&info))
+			return ;
+		printf("philo %d is created\n\n", info->ph_i);
 	}
 }
 
-void	init_philo(t_info *info)
+void	end_philo(t_info *info)
 {
 	int	i;
 
 	i = -1;
 	while (++i < info->ph_num)
 	{
-		info->philo->state = 'e';
-		info->philo->eat_num = 0;
+		if (pthread_join(info->philo[i].th, NULL))
+			return ;
+		if (pthread_mutex_destroy(&info->fork[i]))
+			return ;
 	}
-	info->time = 0;
+}
+
+void	current_timestamp(t_info *info)
+{
+	struct timeval	cur;
+
+	gettimeofday(&cur, NULL);
+	info->cur_time = ((long long)cur.tv_sec * 1000 + cur.tv_usec / 1000) - info->st_time;
+	printf("%lld\n", info->cur_time);
 }
 
 int main(int ac, char **av)
 {
 	t_info	info;
-	int		*res;
 
 	if (ac < 5 || ac > 6 || !input_check_and_assign(av, &info))
 		return (1);
 	init_philo(&info);
-	info.ph_i = -1;
-	while (++info.ph_i < info.ph_num)
-	{
-		if (pthread_mutex_init(&info.fork[info.ph_i], NULL))
-			return (1);
-		if (pthread_create(&info.philo[info.ph_i], NULL, &routine, (void *)&info))
-			return (1);
-	}
-	info.ph_i = -1;
-	while (++info.ph_i < info.ph_num)
-	{
-		if (pthread_join(&info.philo[info.ph_i], NULL))
-			return (1);
-		if (pthread_mutex_destroy(&info.fork[info.ph_i]))
-			return (1);
-	}
+	end_philo(&info);
 }
 
 /*
