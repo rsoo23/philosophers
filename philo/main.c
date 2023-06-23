@@ -51,50 +51,57 @@ void	init_timestamp(t_info *info)
 
 	gettimeofday(&(start), NULL);
 	info->st_time = (long long)start.tv_sec * 1000 + start.tv_usec / 1000;
-	printf("%lld\n\n", info->st_time);
+	// printf("%lld\n\n", info->st_time);
+}
+
+void	get_time(t_info *info)
+{
+	struct timeval	cur;
+
+	gettimeofday(&cur, NULL);
+	info->time = ((long long)cur.tv_sec * 1000 + cur.tv_usec / 1000) - info->st_time;
+	// printf("%lld\n", info->time);
 }
 
 void	*routine(void *info)
 {
 	t_info	*in;
+	int		ph_i;
 
 	in = (t_info *)(info);
-	printf("%d, %d, %d, %d\n", in->ph_num, in->t_die, in->t_eat, in->t_sleep);
+	ph_i = in->i;
 	init_timestamp(in);
-	printf("routine for philo %d\n\n", in->ph_i);
-	// while (1)
-	// {
-	// 	printf("philo %d has state %c\n", in->ph_i, in->philo[in->ph_i].state);
-	// 	if (in->philo[in->ph_i].state == 'e')
-	// 		philo_eat(in);
-	// 	else if (in->philo[in->ph_i].state == 's')
-	// 		philo_sleep(in);
-	// 	else if (in->philo[in->ph_i].state == 't')
-	// 		philo_think(in);
-	// 	// if (in->must_eat_num == in->philo[in->ph_i].eat_num)
-	// 	// 	return (NULL);
-	// }
+	get_time(in);
+	while (1)
+	{
+		philo_eat(in, ph_i);
+		philo_sleep(in, ph_i);
+		philo_think(in, ph_i);
+		if (in->must_eat_num == in->philo[ph_i].eat_num)
+			return (NULL);
+	}
 	return (NULL);
 }
 
-
 void	init_philo(t_info *info)
 {
-	info->ph_i = -1;
-	while (++info->ph_i < info->ph_num)
+	if (info->ph_num == 1)
+		philo_dies(info, 1);
+	info->think_st_time = 0;
+	info->i = -1;
+	while (++info->i < info->ph_num)
 	{
-		info->philo[info->ph_i].state = 'e';
-		info->philo[info->ph_i].eat_num = 0;
-		if (pthread_mutex_init(&info->fork[info->ph_i], NULL))
+		info->philo[info->i].eat_num = 0;
+		if (pthread_mutex_init(&info->fork[info->i], NULL))
 			return ;
-		printf("fork %d is created\n\n", info->ph_i);
+		// printf("	fork %d is created\n", info->i + 1);
 	}
-	info->ph_i = -1;
-	while (++info->ph_i < info->ph_num)
+	info->i = -1;
+	while (++info->i < info->ph_num)
 	{
-		if (pthread_create(&info->philo[info->ph_i].th, NULL, &routine, (void *)&info))
+		// printf("	i: %d\n", info->i);
+		if (pthread_create(&info->philo[info->i].th, NULL, &routine, (void *)info))
 			return ;
-		printf("philo %d is created\n\n", info->ph_i);
 	}
 }
 
@@ -110,15 +117,6 @@ void	end_philo(t_info *info)
 		if (pthread_mutex_destroy(&info->fork[i]))
 			return ;
 	}
-}
-
-void	current_timestamp(t_info *info)
-{
-	struct timeval	cur;
-
-	gettimeofday(&cur, NULL);
-	info->cur_time = ((long long)cur.tv_sec * 1000 + cur.tv_usec / 1000) - info->st_time;
-	printf("%lld\n", info->cur_time);
 }
 
 int main(int ac, char **av)

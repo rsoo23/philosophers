@@ -12,7 +12,7 @@
 
 NAME = philo
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=address -fdiagnostics-color=always -g3
+CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=address -g3
 RM = rm -rf
 
 SRCS = main input_check philo_states
@@ -25,6 +25,7 @@ OBJS = $(SRCS_CFILES:.c=.o)
 all: $(NAME)
 
 $(NAME): $(OBJS)
+	$(CC) $(CFLAGS) $^ -o $(NAME)
 
 clean:
 	$(RM) $(OBJS)
