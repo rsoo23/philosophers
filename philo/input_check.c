@@ -88,5 +88,6 @@ int	input_check_and_assign(char **av, t_info *info)
 	info->t_sleep = (int)ft_atoi_long(av[4]);
 	if (av[5])
 		info->must_eat_num = (int)ft_atoi_long(av[5]);
+	// printf("%d, %d, %d, %d\n", info->ph_num, info->t_die, info->t_eat, info->t_sleep);
 	return (1);
 }

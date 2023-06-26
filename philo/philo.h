@@ -20,38 +20,40 @@
 #include <sys/time.h> // gettimeofday
 #include <pthread.h>  // pthread: create, detach, join, mutex_init, mutex_destroy, mutex_lock, mutex_unlock
 
-typedef struct s_ph
-{
-	pthread_t   th;
-	char		state;
-	int			eat_num;
-}	t_ph;
 
 typedef struct s_info
 {
+	pthread_mutex_t	fork[200];
 	int				ph_num;
 	int				t_die;
 	int				t_eat;
 	int				t_sleep;
 	int				must_eat_num;
-	pthread_mutex_t	fork[200];
-	t_ph			philo[200];
-	int				i;
 	long long		st_time;
-	long long		think_st_time;
-	long long		time;
 }   t_info;
 
+typedef struct s_ph
+{
+	pthread_t		th;
+	int				ph_i;
+	int				eat_num;
+	int				die_status;
+	long long		time;
+	long long		eat_st_time;
+	t_info			*info;
+}	t_ph;
+
 // main.c
-void	get_time(t_info *info);
+long long	get_time(t_ph *ph);
 
 // input_check.c
-int		input_check_and_assign(char **av, t_info *info);
+int			input_check_and_assign(char **av, t_info *info);
 
 // philo_states.c
-void	philo_eat(t_info *info, int i);
-void	philo_sleep(t_info *info, int i);
-void	philo_think(t_info *info, int i);
-void	philo_dies(t_info *info, int i);
+int			check_if_dead(t_ph *ph, t_info *info, int i);
+void		philo_eat(t_ph *ph, t_info *info, int i);
+void		philo_sleep(t_ph *ph, t_info *info, int i);
+void		philo_think(t_ph *ph, int i);
+void		philo_dies(t_ph *ph, t_info *info, int i);
 
 #endif

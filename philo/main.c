@@ -51,68 +51,74 @@ void	init_timestamp(t_info *info)
 
 	gettimeofday(&(start), NULL);
 	info->st_time = (long long)start.tv_sec * 1000 + start.tv_usec / 1000;
-	// printf("%lld\n\n", info->st_time);
+	// printf("%lld\n\n", ph->st_time);
 }
 
-void	get_time(t_info *info)
+long long	get_time(t_ph *ph)
 {
 	struct timeval	cur;
 
 	gettimeofday(&cur, NULL);
-	info->time = ((long long)cur.tv_sec * 1000 + cur.tv_usec / 1000) - info->st_time;
-	// printf("%lld\n", info->time);
+	return(((long long)cur.tv_sec * 1000 + cur.tv_usec / 1000) 
+	- ph->info->st_time);
 }
 
-void	*routine(void *info)
+void	*routine(void *philo)
 {
-	t_info	*in;
-	int		ph_i;
+	t_ph	*ph;
 
-	in = (t_info *)(info);
-	ph_i = in->i;
-	init_timestamp(in);
-	get_time(in);
+	ph = (t_ph *)(philo);
+	ph->eat_st_time = 0;
 	while (1)
 	{
-		philo_eat(in, ph_i);
-		philo_sleep(in, ph_i);
-		philo_think(in, ph_i);
-		if (in->must_eat_num == in->philo[ph_i].eat_num)
-			return (NULL);
+		philo_eat(ph, ph->info, ph->ph_i);
+		if (ph->die_status)
+			break ;
+		philo_sleep(ph, ph->info, ph->ph_i);
+		philo_think(ph, ph->ph_i);
+		if (ph->info->must_eat_num && ph->info->must_eat_num == ph->eat_num)
+			break ;
 	}
 	return (NULL);
 }
 
-void	init_philo(t_info *info)
+/*
+if info is passed in via pthread_create, I would need the index to 
+get the correct philo index, but it is updated before the routine
+starts causing a data race
+
+so I'll declare the philo[200] here instead of inside the struct
+*/
+
+void	init_philo(t_ph philo[200], t_info *info)
 {
+	int		i;
+
 	if (info->ph_num == 1)
-		philo_dies(info, 1);
-	info->think_st_time = 0;
-	info->i = -1;
-	while (++info->i < info->ph_num)
+		philo_dies(&philo[0], info, 0);
+	init_timestamp(info);
+	i = -1;
+	while (++i < info->ph_num)
 	{
-		info->philo[info->i].eat_num = 0;
-		if (pthread_mutex_init(&info->fork[info->i], NULL))
+		philo[i].ph_i = i;
+		philo[i].eat_num = 0;
+		philo[i].die_status = 0;
+		philo[i].info = info;
+		if (pthread_mutex_init(&info->fork[i], NULL))
 			return ;
-		// printf("	fork %d is created\n", info->i + 1);
-	}
-	info->i = -1;
-	while (++info->i < info->ph_num)
-	{
-		// printf("	i: %d\n", info->i);
-		if (pthread_create(&info->philo[info->i].th, NULL, &routine, (void *)info))
+		if (pthread_create(&philo[i].th, NULL, &routine, (void *)(&philo[i])))
 			return ;
 	}
 }
 
-void	end_philo(t_info *info)
+void	exit_philo(t_ph philo[200], t_info *info)
 {
 	int	i;
 
 	i = -1;
 	while (++i < info->ph_num)
 	{
-		if (pthread_join(info->philo[i].th, NULL))
+		if (pthread_join(philo[i].th, NULL))
 			return ;
 		if (pthread_mutex_destroy(&info->fork[i]))
 			return ;
@@ -122,11 +128,12 @@ void	end_philo(t_info *info)
 int main(int ac, char **av)
 {
 	t_info	info;
+	t_ph	philo[200];
 
 	if (ac < 5 || ac > 6 || !input_check_and_assign(av, &info))
 		return (1);
-	init_philo(&info);
-	end_philo(&info);
+	init_philo(philo, &info);
+	exit_philo(philo, &info);
 }
 
 /*
