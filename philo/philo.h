@@ -24,11 +24,13 @@
 typedef struct s_info
 {
 	pthread_mutex_t	fork[200];
+	pthread_mutex_t	die_lock;
 	int				ph_num;
 	int				t_die;
 	int				t_eat;
 	int				t_sleep;
 	int				must_eat_num;
+	int				glob_die_status;
 	long long		st_time;
 }   t_info;
 
@@ -44,16 +46,21 @@ typedef struct s_ph
 }	t_ph;
 
 // main.c
-long long	get_time(t_ph *ph);
 
 // input_check.c
 int			input_check_and_assign(char **av, t_info *info);
 
 // philo_states.c
-int			check_if_dead(t_ph *ph, t_info *info, int i);
+void		philo_take_forks(t_ph *ph, t_info *info, int i);
 void		philo_eat(t_ph *ph, t_info *info, int i);
 void		philo_sleep(t_ph *ph, t_info *info, int i);
 void		philo_think(t_ph *ph, int i);
-void		philo_dies(t_ph *ph, t_info *info, int i);
+
+// utils_1.c
+void		check_if_dead(t_ph *ph, t_info *info, int i);
+void		mod_usleep(int duration, t_ph *ph);
+int			lock_printf(long long time, t_ph *ph, int i, char c);
+void		init_timestamp(t_info *info);
+long long	get_time(t_ph *ph);
 
 #endif

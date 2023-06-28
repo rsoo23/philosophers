@@ -18,7 +18,7 @@ sem_wait():
 sem_post():
 - increments the semaphore (s++) once it is done executing
 
-semphores are basically mutexes with a counter
+semaphores are basically mutexes with a counter
 -: sem_wait()
 p: print
 +: sem_post()

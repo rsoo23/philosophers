@@ -12,10 +12,10 @@
 
 NAME = philo
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=address
+CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=thread
 RM = rm -rf
 
-SRCS = main input_check philo_states
+SRCS = main input_check philo_states utils_1
 SRCS_CFILES = $(addsuffix .c, $(SRCS))
 OBJS = $(SRCS_CFILES:.c=.o)
 
