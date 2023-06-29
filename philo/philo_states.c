@@ -6,7 +6,7 @@
 /*   By: rsoo <rsoo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/23 20:34:59 by rsoo              #+#    #+#             */
-/*   Updated: 2023/06/28 15:57:56 by rsoo             ###   ########.fr       */
+/*   Updated: 2023/06/29 10:26:23 by rsoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,20 +15,21 @@
 void	philo_take_forks(t_ph *ph, t_info *info, int i)
 {
 	pthread_mutex_lock(&info->fork[i]);
+	if (i == 2)
+		printf("philo 3 taking fork\n");
 	if (!lock_printf(get_time(ph), ph, i, 'f'))
 		return ;
 
-	if (i + 1 == info->ph_num)
-		pthread_mutex_lock(&info->fork[0]);
-	else
-		pthread_mutex_lock(&info->fork[i + 1]);
+	pthread_mutex_lock(&info->fork[(i + 1) % info->ph_num]);
 	if (!lock_printf(get_time(ph), ph, i, 'f'))
 		return ;
 }
 
 void	philo_eat(t_ph *ph, t_info *info, int i)
 {
+	pthread_mutex_lock(&info->die_lock);
 	ph->eat_st_time = get_time(ph);
+	pthread_mutex_unlock(&info->die_lock);
 	if (!lock_printf(ph->eat_st_time, ph, i, 'e'))
 		return ;
 
@@ -37,10 +38,7 @@ void	philo_eat(t_ph *ph, t_info *info, int i)
 		ph->eat_num++;
 
 	pthread_mutex_unlock(&info->fork[i]);
-	if (i + 1 == info->ph_num)
-		pthread_mutex_unlock(&info->fork[0]);
-	else
-		pthread_mutex_unlock(&info->fork[i + 1]);
+	pthread_mutex_unlock(&info->fork[(i + 1) % info->ph_num]);
 }
 
 void	philo_sleep(t_ph *ph, t_info *info, int i)

@@ -53,20 +53,36 @@ void	*routine(void *philo)
 	while (1)
 	{
 		philo_take_forks(ph, ph->info, ph->ph_i);
-		if (ph->die_status)
+
+		pthread_mutex_lock(&ph->info->die_lock);
+		if (ph->info->glob_die_status)
 			break ;
+		pthread_mutex_unlock(&ph->info->die_lock);
+
 		philo_eat(ph, ph->info, ph->ph_i);
-		if (ph->die_status)
+
+		pthread_mutex_lock(&ph->info->die_lock);
+		if (ph->info->glob_die_status)
 			break ;
+		pthread_mutex_unlock(&ph->info->die_lock);
+
 		philo_sleep(ph, ph->info, ph->ph_i);
-		if (ph->die_status)
+
+		pthread_mutex_lock(&ph->info->die_lock);
+		if (ph->info->glob_die_status)
 			break ;
+		pthread_mutex_unlock(&ph->info->die_lock);
+
 		philo_think(ph, ph->ph_i);
-		if (ph->die_status)
+		pthread_mutex_lock(&ph->info->die_lock);
+		if (ph->info->glob_die_status)
 			break ;
+		pthread_mutex_unlock(&ph->info->die_lock);
+	
 		if (ph->info->must_eat_num && ph->info->must_eat_num == ph->eat_num)
 			break ;
 	}
+	printf("thread %d exited\n", ph->ph_i);
 	return (NULL);
 }
 
@@ -82,19 +98,23 @@ void	check_any_ph_die(t_ph philo[200], t_info *info)
 {
 	int	i;
 
-	i = -1;
-	pthread_mutex_init(&info->die_lock, NULL);
 	mod_usleep(info->t_eat, &philo[0]);
 	while (!info->glob_die_status)
 	{
+		pthread_mutex_lock(&info->die_lock);
+		i = -1;
 		while (++i < info->ph_num)
 		{
-			printf("	check_ind: %d\n", i);
-			check_if_dead(&philo[i], info, i);
+			if (get_time(&philo[i]) - philo[i].eat_st_time > info->t_die)
+			{
+				info->glob_die_status = 1;
+				break ;
+			}
 		}
-		// printf("	glob_ds:%d\n", info->glob_die_status);
+		pthread_mutex_unlock(&info->die_lock);
 	}
-	pthread_mutex_destroy(&info->die_lock);
+	printf("philo %d died\n", i);
+	// pthread_mutex_unlock(&info->die_lock);
 }
 
 void	init_philo(t_ph philo[200], t_info *info)
@@ -104,12 +124,12 @@ void	init_philo(t_ph philo[200], t_info *info)
 	i = -1;
 	info->glob_die_status = 0;
 	init_timestamp(info);
+	pthread_mutex_init(&info->die_lock, NULL);
 	while (++i < info->ph_num)
 	{
 		philo[i].ph_i = i;
 		philo[i].info = info;
 		philo[i].eat_num = 0;
-		philo[i].die_status = 0;
 		philo[i].eat_st_time = 0;
 		if (pthread_mutex_init(&info->fork[i], NULL))
 			return ;
@@ -126,11 +146,13 @@ void	exit_philo(t_ph philo[200], t_info *info)
 	i = -1;
 	while (++i < info->ph_num)
 	{
+		printf("thread and mutex %d destroyed\n", i);
 		if (pthread_join(philo[i].th, NULL))
 			return ;
 		if (pthread_mutex_destroy(&info->fork[i]))
 			return ;
 	}
+	pthread_mutex_destroy(&info->die_lock);
 }
 
 int main(int ac, char **av)

@@ -6,7 +6,7 @@
 /*   By: rsoo <rsoo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/28 08:31:09 by rsoo              #+#    #+#             */
-/*   Updated: 2023/06/28 16:00:10 by rsoo             ###   ########.fr       */
+/*   Updated: 2023/06/29 10:21:24 by rsoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,26 +21,11 @@ void	mod_usleep(int duration, t_ph *ph)
 		usleep(50);
 }
 
-void	check_if_dead(t_ph *ph, t_info *info, int i)
-{
-	pthread_mutex_lock(&info->die_lock);
-	printf("	time since last eat:%lld philo: %d\n", get_time(ph) - ph->eat_st_time, i);
-	if (get_time(ph) - ph->eat_st_time > info->t_die)
-	{
-		printf("%07lld %d died\n", get_time(ph), i + 1);
-		ph->die_status = 1;
-		info->glob_die_status = 1;
-	}
-	else if (info->glob_die_status)
-		ph->die_status = 1;
-	pthread_mutex_unlock(&info->die_lock);
-}
-
 int	lock_printf(long long time, t_ph *ph, int i, char c)
 {
-	// pthread_mutex_lock(&ph->info->die_lock);
-	printf("	die status: %d, philo: %d\n", ph->die_status, i);
-	if (!ph->die_status)
+	pthread_mutex_lock(&ph->info->die_lock);	
+	printf("	gds: %d\n", ph->info->glob_die_status);
+	if (!ph->info->glob_die_status)
 	{
 		if (c == 'f')
 			printf("%07lld %d has taken a fork\n", time, i + 1);
@@ -50,10 +35,13 @@ int	lock_printf(long long time, t_ph *ph, int i, char c)
 			printf("%07lld %d is sleeping\n", time, i + 1);
 		else if (c == 't')
 			printf("%07lld %d is thinking\n", time, i + 1);
+		pthread_mutex_unlock(&ph->info->die_lock);
 		return (1);
 	}
+	else
+		printf("%07lld %d died\n", get_time(ph), i + 1);
+	pthread_mutex_unlock(&ph->info->die_lock);
 	return (0);
-	// pthread_mutex_unlock(&ph->info->die_lock);
 }
 
 void	init_timestamp(t_info *info)

@@ -39,7 +39,6 @@ typedef struct s_ph
 	pthread_t		th;
 	int				ph_i;
 	int				eat_num;
-	int				die_status;
 	long long		time;
 	long long		eat_st_time;
 	t_info			*info;
@@ -57,7 +56,6 @@ void		philo_sleep(t_ph *ph, t_info *info, int i);
 void		philo_think(t_ph *ph, int i);
 
 // utils_1.c
-void		check_if_dead(t_ph *ph, t_info *info, int i);
 void		mod_usleep(int duration, t_ph *ph);
 int			lock_printf(long long time, t_ph *ph, int i, char c);
 void		init_timestamp(t_info *info);
