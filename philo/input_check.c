@@ -12,13 +12,6 @@
 
 #include "philo.h"
 
-static int ft_isdigit(int c)
-{
-    if (c >= '0' && c <= '9')
-        return (1);
-    return (0);
-}
-
 static long	ft_atoi_long(const char *str)
 {
 	int		i;
@@ -54,40 +47,75 @@ static int	check_if_all_digits(char **av)
 	{
 		j = -1;
 		while (av[i][++j])
-			if (!ft_isdigit(av[i][j]))
+			if (av[i][j] < '0' || av[i][j] > '9')
 				return (0);
 	}
 	return (1);
 }
 
-static int	check_num_size(char **av)
+static int	get_info_1(char **av, t_info *info, long temp)
 {
-	int		i;
-	long	num;
-
-	i = -1;
-	num = 0;
-	while (av[++i])
+	temp = ft_atoi_long(av[1]);
+	if (temp < 1 || temp > 200)
 	{
-		num = ft_atoi_long(av[i]);
-		if (num > 2147483647 || num < -2147483648)
-			return (0);
+		printf("Error: Philosopher Number (1 - 200)\n");
+		return (0);
 	}
+	info->ph_num = (int)temp;
+	temp = ft_atoi_long(av[2]);
+	if (temp < 1 || temp > 2147483647)
+	{
+		printf("Error: Time to die\n");
+		return (0);
+	}
+	info->t_die = (int)temp;
+	temp = ft_atoi_long(av[3]);
+	if (temp < 1 || temp > 2147483647)
+	{
+		printf("Error: Time to eat\n");
+		return (0);
+	}
+	info->t_eat = (int)temp;
 	return (1);
 }
 
-int	input_check_and_assign(char **av, t_info *info)
+static int	get_info_2(char **av, t_info *info, long temp)
 {
-	if (!check_if_all_digits(av))
+	temp = ft_atoi_long(av[4]);
+	if (temp < 1 || temp > 2147483647)
+	{
+		printf("Error: Time to sleep\n");
 		return (0);
-	if (!check_num_size(av))
-		return (0);
-	info->ph_num = (int)ft_atoi_long(av[1]);
-	info->t_die = (int)ft_atoi_long(av[2]);
-	info->t_eat = (int)ft_atoi_long(av[3]);
-	info->t_sleep = (int)ft_atoi_long(av[4]);
+	}
+	info->t_sleep = (int)temp;
 	if (av[5])
-		info->must_eat_num = (int)ft_atoi_long(av[5]);
-	// printf("%d, %d, %d, %d\n", info->ph_num, info->t_die, info->t_eat, info->t_sleep);
+	{
+		temp = ft_atoi_long(av[5]);
+		if (temp < 1 || temp > 2147483647)
+		{
+			printf("Error: Must Eat Number\n");
+			return (0);
+		}
+		info->must_eat_num = (int)temp;
+	}
+	else
+		info->must_eat_num = 0;
+	return (1);
+}
+
+int	parse_and_check_input(char **av, t_info *info)
+{
+	long	temp;
+
+	temp = 0;
+	if (!check_if_all_digits(av))
+	{
+		printf("Error: Argument(s) have non-numerical value\n");
+		return (0);
+	}
+	if (!get_info_1(av, info, temp))
+		return (0);
+	if (!get_info_2(av, info, temp))
+		return (0);
 	return (1);
 }
