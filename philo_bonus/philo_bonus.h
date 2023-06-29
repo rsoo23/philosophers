@@ -24,4 +24,24 @@
 #include <sys/wait.h>  // waitpid
 #include <semaphore.h> // sem_open, sem_close, sem_post, sem_wait, sem_unlink
 
+typedef struct s_info
+{
+	int				ph_num;
+	int				t_die;
+	int				t_eat;
+	int				t_sleep;
+	int				must_eat_num;
+	int				must_eat_num_success;
+	int				glob_die_status;
+	long long		st_time;
+}	t_info;
+
+// input_check.c
+int			parse_and_check_input(char **av, t_info *info);
+
+// utils_1.c
+void		mod_usleep(int duration, t_info *info);
+void		init_timestamp(t_info *info);
+long long	get_time(t_info *info);
+
 #endif

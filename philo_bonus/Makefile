@@ -12,11 +12,11 @@
 
 NAME = philo_bonus
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=address -fdiagnostics-color=always -g3
+CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=pthread -g3
 RM = rm -rf
 
 SRCS_DIR = philo_bonus/
-SRCS = 
+SRCS = main input_check utils_1
 SRCS_CFILES = $(addprefix $(SRCS_DIR), $(addsuffix .c, $(SRCS)))
 OBJS = $(SRCS_CFILES:.c=.o)
 

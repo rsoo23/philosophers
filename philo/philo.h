@@ -47,8 +47,6 @@ typedef struct s_ph
 	t_info			*info;
 }	t_ph;
 
-// main.c
-
 // input_check.c
 int			parse_and_check_input(char **av, t_info *info);
 
