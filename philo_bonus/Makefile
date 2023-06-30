@@ -12,12 +12,11 @@
 
 NAME = philo_bonus
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=pthread -g3
+CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=thread -g3
 RM = rm -rf
 
-SRCS_DIR = philo_bonus/
-SRCS = main input_check utils_1
-SRCS_CFILES = $(addprefix $(SRCS_DIR), $(addsuffix .c, $(SRCS)))
+SRCS = main input_check utils_1 philo_states
+SRCS_CFILES = $(addsuffix .c, $(SRCS))
 OBJS = $(SRCS_CFILES:.c=.o)
 
 %.o: %.c
@@ -26,6 +25,7 @@ OBJS = $(SRCS_CFILES:.c=.o)
 all: $(NAME)
 
 $(NAME): $(OBJS)
+	$(CC) $(CFLAGS) $^ -o $(NAME)
 
 clean:
 	$(RM) $(OBJS)

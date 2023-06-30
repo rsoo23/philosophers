@@ -12,54 +12,92 @@
 
 #include "philo_bonus.h"
 
-/*
-Notes:
-sem_wait(): 
-- if s == 0, it no longer can be decremented, the thread will wait on that semaphore 
-- if s > 0, it decrements (s--) and executes
-sem_post():
-- increments the semaphore (s++) once it is done executing
+// Notes:
+// sem_wait(): 
+// - if s == 0, it no longer can be decremented, 
+// the thread will wait on that semaphore 
+// - if s > 0, it decrements (s--) and executes
+// sem_post():
+// - increments the semaphore (s++) once it is done executing
 
-semaphores are basically mutexes with a counter
--: sem_wait()
-p: print
-+: sem_post()
-if sem == 1
-T0  | . - p +
-T1  | . . . . - p + 
-T2  | . . . . . . . - p +
-T3  | . . . . . . . . . . - p +
-Sem | 1 0 0 1 0 0 1 0 0 1 0 0 1
+// semaphores are basically mutexes with a counter
+// -: sem_wait()
+// p: print
+// +: sem_post()
+// if sem == 1
+// T0  | . - p +
+// T1  | . . . . - p + 
+// T2  | . . . . . . . - p +
+// T3  | . . . . . . . . . . - p +
+// Sem | 1 0 0 1 0 0 1 0 0 1 0 0 1
 
-if sem == 2
-T0  | . - p +
-T1  | . - p + 
-T2  | . . . . - p +
-T3  | . . . . - p +
-Sem | 2 0 0 2 0 0 2
-*/
+// if sem == 2
+// T0  | . - p +
+// T1  | . - p + 
+// T2  | . . . . - p +
+// T3  | . . . . - p +
+// Sem | 2 0 0 2 0 0 2
 
-static void	child_proc()
+static void	child_proc(t_ph *ph, t_info *info, int ph_i)
 {
-
+	while (1)
+	{
+		if (!philo_take_forks(ph, info, ph_i))
+			break ;
+		if (!philo_eat(ph, info, ph_i))
+			break ;
+		if (!philo_sleep(ph, info, ph_i))
+			break ;
+		if (!philo_think(ph, info, ph_i))
+			break ;
+		if (info->must_eat_num && info->must_eat_num == eat_num)
+		{
+			sem_wait(info->must_eat_sem);
+			info->must_eat_num_success++;
+			sem_post(info->must_eat_sem);
+			break ;
+		}
+	}
+	return ;
 }
 
-static void init_philo_bonus(t_ph philo[200], t_info *info)
+static int	init_sem(t_info *info)
 {
-	sem_t	*forks;
+	info->forks = sem_open("/forks", O_CREAT, 0666, info->ph_num);
+	if (info->forks == SEM_FAILED)
+	{
+		printf("Error: Failed to open semaphore (forks)\n");
+		return (0);
+	}
+	info->die_sem = sem_open("/die_sem", O_CREAT, 0666, 1);
+	if (info->die_sem == SEM_FAILED)
+	{
+		printf("Error: Failed to open semaphore (die_sem)\n");
+		return (0);
+	}
+	info->must_eat_sem = sem_open("/must_eat_sem", O_CREAT, 0666, 1);
+	if (info->must_eat_sem == SEM_FAILED)
+	{
+		printf("Error: Failed to open semaphore (must_eat_sem)\n");
+		return (0);
+	}
+	return (1);
+}
+
+static void	init_philo(t_ph philo[200], t_info *info)
+{
 	pid_t	pid;
 	int		i;
 
 	init_timestamp(info);
-	forks = sem_open("/forks", O_CREAT, 0666, info->ph_num);
-	if (fork == SEM_FAILED)
-	{
-		printf("Error: Failed to open semaphore\n");
-		return ;
-	}
+	init_sem(info);
 	i = -1;
 	while (++i < info->ph_num)
 	{
+		philo[i].ph_i = i;
+		philo[i].info = info;
+		philo[i].eat_num = 0;
+		philo[i].eat_st_time = 0;
 		pid = fork();
 		if (pid < 0)
 		{
@@ -67,12 +105,26 @@ static void init_philo_bonus(t_ph philo[200], t_info *info)
 			exit(EXIT_FAILURE);
 		}
 		else if (pid == 0)
-			child_proc();
+			child_proc(&philo[i], info, i);
 	}
 	check_any_ph_die(philo, info);
 	i = -1;
 	while (++i < info->ph_num)
-		wait(NULL);
+	{
+		if (pthread_join(philo[i].th, NULL))
+			return ;
+		waitpid(pid, NULL, 0);
+	}
+}
+
+static void	exit_philo(t_info *info)
+{
+	sem_close(info->forks);
+	sem_unlink("/forks");
+	sem_close(info->die_sem);
+	sem_unlink("/die_sem");
+	sem_close(info->must_eat_sem);
+	sem_unlink("/must_eat_sem");
 }
 
 int	main(int ac, char **av)
@@ -90,5 +142,6 @@ int	main(int ac, char **av)
 		printf("%07lld %d died\n", (long long)0, 1);
 		return (0);
 	}
-	init_philo_bonus(philo, &info);
+	init_philo(philo, &info);
+	exit_philo(&info);
 }

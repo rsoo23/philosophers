@@ -12,6 +12,31 @@
 
 #include "philo_bonus.h"
 
+void	check_any_ph_die(t_ph philo[200], t_info *info)
+{
+	int	i;
+
+	mod_usleep(info->t_eat, info);
+	while (!info->glob_die_status)
+	{
+		sem_wait(info->die_sem);
+		i = -1;
+		while (++i < info->ph_num)
+		{
+			if (get_time(info) - philo[i].eat_st_time > info->t_die)
+			{
+				info->glob_die_status = 1;
+				break ;
+			}
+		}
+		sem_post(info->die_sem);
+	}
+	sem_wait(info->must_eat_sem);
+	if (info->must_eat_num_success != info->ph_num)
+		printf("%07lld %d died\n", get_time(info), i + 1);
+	sem_post(info->must_eat_sem);
+}
+
 void	mod_usleep(int duration, t_info *info)
 {
 	long long	st_time;
