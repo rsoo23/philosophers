@@ -61,7 +61,7 @@ int			philo_sleep(t_ph *ph, t_info *info, int i);
 int			philo_think(t_ph *ph, t_info *info, int i);
 
 // utils_1.c
-void		check_any_ph_die(t_ph philo[200], t_info *info);
+void		*check_any_ph_die(void *philo);
 void		mod_usleep(int duration, t_info *info);
 void		init_timestamp(t_info *info);
 long long	get_time(t_info *info);

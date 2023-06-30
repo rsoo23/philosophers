@@ -40,6 +40,11 @@
 
 static void	child_proc(t_ph *ph, t_info *info, int ph_i)
 {
+	pthread_t	check_die_th;
+
+	if (pthread_create(&check_die_th, NULL, &check_any_ph_die, (void *)(ph)))
+		return ;
+	pthread_detach(check_die_th);
 	while (1)
 	{
 		if (!philo_take_forks(ph, info, ph_i))
@@ -50,7 +55,7 @@ static void	child_proc(t_ph *ph, t_info *info, int ph_i)
 			break ;
 		if (!philo_think(ph, info, ph_i))
 			break ;
-		if (info->must_eat_num && info->must_eat_num == eat_num)
+		if (info->must_eat_num && info->must_eat_num == ph->eat_num)
 		{
 			sem_wait(info->must_eat_sem);
 			info->must_eat_num_success++;
@@ -107,14 +112,9 @@ static void	init_philo(t_ph philo[200], t_info *info)
 		else if (pid == 0)
 			child_proc(&philo[i], info, i);
 	}
-	check_any_ph_die(philo, info);
 	i = -1;
 	while (++i < info->ph_num)
-	{
-		if (pthread_join(philo[i].th, NULL))
-			return ;
 		waitpid(pid, NULL, 0);
-	}
 }
 
 static void	exit_philo(t_info *info)

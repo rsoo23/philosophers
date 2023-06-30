@@ -12,29 +12,32 @@
 
 #include "philo_bonus.h"
 
-void	check_any_ph_die(t_ph philo[200], t_info *info)
+void	*check_any_ph_die(void *philo)
 {
-	int	i;
+	t_ph	*ph;
+	int		i;
 
-	mod_usleep(info->t_eat, info);
-	while (!info->glob_die_status)
+	ph = (t_ph *)philo;
+	mod_usleep(ph->info->t_eat, ph->info);
+	while (!ph->info->glob_die_status)
 	{
-		sem_wait(info->die_sem);
+		sem_wait(ph->info->die_sem);
 		i = -1;
-		while (++i < info->ph_num)
+		while (++i < ph->info->ph_num)
 		{
-			if (get_time(info) - philo[i].eat_st_time > info->t_die)
+			if (get_time(ph->info) - ph->eat_st_time > ph->info->t_die)
 			{
-				info->glob_die_status = 1;
+				ph->info->glob_die_status = 1;
 				break ;
 			}
 		}
-		sem_post(info->die_sem);
+		sem_post(ph->info->die_sem);
 	}
-	sem_wait(info->must_eat_sem);
-	if (info->must_eat_num_success != info->ph_num)
-		printf("%07lld %d died\n", get_time(info), i + 1);
-	sem_post(info->must_eat_sem);
+	sem_wait(ph->info->must_eat_sem);
+	if (ph->info->must_eat_num_success != ph->info->ph_num)
+		printf("%07lld %d died\n", get_time(ph->info), i + 1);
+	sem_post(ph->info->must_eat_sem);
+	return (NULL);
 }
 
 void	mod_usleep(int duration, t_info *info)
