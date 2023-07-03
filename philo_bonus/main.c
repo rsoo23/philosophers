@@ -40,11 +40,14 @@
 
 static void	child_proc(t_ph *ph, t_info *info, int ph_i)
 {
-	pthread_t	check_die_th;
+	// pthread_t	check_die_th;
 
-	if (pthread_create(&check_die_th, NULL, &check_any_ph_die, (void *)(ph)))
-		return ;
-	pthread_detach(check_die_th);
+	// if (pthread_create(&check_die_th, NULL, &check_any_ph_die, (void *)(ph)))
+	// 	return ;
+	// pthread_detach(check_die_th);
+	// info->forks = sem_open("/forks", 0);
+	// info->die_sem = sem_open("/die_sem", 0);
+	// info->must_eat_sem = sem_open("/must_eat_num", 0);
 	while (1)
 	{
 		if (!philo_take_forks(ph, info, ph_i))
@@ -68,6 +71,9 @@ static void	child_proc(t_ph *ph, t_info *info, int ph_i)
 
 static int	init_sem(t_info *info)
 {
+	sem_unlink("/forks");
+	sem_unlink("/die_sem");
+	sem_unlink("/must_eat_sem");
 	info->forks = sem_open("/forks", O_CREAT, 0666, info->ph_num);
 	if (info->forks == SEM_FAILED)
 	{
@@ -96,34 +102,36 @@ static void	init_philo(t_ph philo[200], t_info *info)
 
 	init_timestamp(info);
 	init_sem(info);
+	info->glob_die_status = 0;
+	info->must_eat_num_success = 0;
 	i = -1;
 	while (++i < info->ph_num)
 	{
-		philo[i].ph_i = i;
 		philo[i].info = info;
+		philo[i].ph_i = i;
 		philo[i].eat_num = 0;
 		philo[i].eat_st_time = 0;
 		pid = fork();
 		if (pid < 0)
 		{
-			printf("Error: Forking");
+			printf("Error: Forking\n");
 			exit(EXIT_FAILURE);
 		}
 		else if (pid == 0)
 			child_proc(&philo[i], info, i);
 	}
-	i = -1;
-	while (++i < info->ph_num)
-		waitpid(pid, NULL, 0);
+	// printf("proc exit\n");
+	wait(NULL);
+	printf("child died\n");
 }
 
 static void	exit_philo(t_info *info)
 {
 	sem_close(info->forks);
-	sem_unlink("/forks");
 	sem_close(info->die_sem);
-	sem_unlink("/die_sem");
 	sem_close(info->must_eat_sem);
+	sem_unlink("/forks");
+	sem_unlink("/die_sem");
 	sem_unlink("/must_eat_sem");
 }
 

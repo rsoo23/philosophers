@@ -138,9 +138,11 @@ static void	init_philo(t_ph philo[200], t_info *info)
 		philo[i].eat_st_time = 0;
 		if (pthread_mutex_init(&info->fork[i], NULL))
 			return ;
+	}
+	i = -1;
+	while (++i < info->ph_num)
 		if (pthread_create(&philo[i].th, NULL, &routine, (void *)(&philo[i])))
 			return ;
-	}
 	check_any_ph_die(philo, info);
 }
 

@@ -6,7 +6,7 @@
 /*   By: rsoo <rsoo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/30 08:55:21 by rsoo              #+#    #+#             */
-/*   Updated: 2023/06/30 10:40:22 by rsoo             ###   ########.fr       */
+/*   Updated: 2023/07/03 11:36:42 by rsoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 static int	lock_printf(long long time, t_ph *ph, int i, char c)
 {
+	// printf("printing\n");
 	sem_wait(ph->info->die_sem);
 	if (!ph->info->glob_die_status)
 	{
@@ -47,6 +48,8 @@ int	philo_take_forks(t_ph *ph, t_info *info, int i)
 		sem_post(info->forks);
 		return (0);
 	}
+	sem_post(info->forks);
+	sem_post(info->forks);
 	return (1);
 }
 
@@ -60,8 +63,6 @@ int	philo_eat(t_ph *ph, t_info *info, int i)
 	mod_usleep(info->t_eat, info);
 	if (info->must_eat_num)
 		ph->eat_num++;
-	sem_post(info->forks);
-	sem_post(info->forks);
 	return (1);
 }
 
