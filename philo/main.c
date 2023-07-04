@@ -54,6 +54,8 @@ static void	*routine(void *philo)
 	t_ph	*ph;
 
 	ph = (t_ph *)(philo);
+	if ((ph->ph_i + 1) % 2 == 0)
+		mod_usleep(ph->info->t_eat, ph->info);
 	while (1)
 	{
 		if (!philo_take_forks(ph, ph->info, ph->ph_i))

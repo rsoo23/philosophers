@@ -12,7 +12,8 @@
 
 NAME = philo
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=thread
+CFLAGS = -Wall -Wextra -Werror 
+#-pthread -fsanitize=thread
 RM = rm -rf
 
 SRCS = main input_check philo_states utils_1
