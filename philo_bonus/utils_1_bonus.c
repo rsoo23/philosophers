@@ -38,6 +38,16 @@ int	init_sem(t_info *info)
 	return (1);
 }
 
+void	exit_philo(t_info *info)
+{
+	sem_close(info->forks);
+	sem_close(info->die_sem);
+	sem_close(info->must_eat_sem);
+	sem_unlink("/forks");
+	sem_unlink("/die_sem");
+	sem_unlink("/must_eat_sem");
+}
+
 void	mod_usleep(int duration, t_info *info)
 {
 	long long	st_time;

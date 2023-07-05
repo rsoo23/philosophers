@@ -38,7 +38,6 @@ typedef struct s_info
 	int				t_sleep;
 	int				must_eat_num;
 	int				must_eat_num_success;
-	int				glob_die_status;
 	long long		st_time;
 }	t_info;
 
@@ -64,5 +63,6 @@ void		mod_usleep(int duration, t_info *info);
 void		init_timestamp(t_info *info);
 long long	get_time(t_info *info);
 int			init_sem(t_info *info);
+void		exit_philo(t_info *info);
 
 #endif

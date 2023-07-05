@@ -38,14 +38,33 @@
 // T3  | . . . . - p +
 // Sem | 2 0 0 2 0 0 2
 
+static void	*check_any_ph_die(void *philo)
+{
+	t_ph	*ph;
+
+	ph = (t_ph *)philo;
+	mod_usleep(ph->info->t_eat, ph->info);
+	while (1)
+	{
+		sem_wait(ph->info->die_sem);
+		if (get_time(ph->info) - ph->eat_st_time > ph->info->t_die)
+			break ;
+		sem_post(ph->info->die_sem);
+	}
+	sem_wait(ph->info->must_eat_sem);
+	if (ph->info->must_eat_num_success != ph->info->ph_num)
+		printf("%07lld %d died\n", get_time(ph->info), ph->ph_i + 1);
+	sem_post(ph->info->must_eat_sem);
+	exit(0);
+}
+
 static void	child_proc(t_ph *ph, t_info *info, int ph_i)
 {
 	pthread_t	check_die_th;
 
 	ph->eat_num = 0;
 	ph->eat_st_time = 0;
-	// if ((ph->ph_i + 1) % 2 == 0)
-	// 	usleep(100);
+	ph->ph_i = ph_i;
 	if (pthread_create(&check_die_th, NULL, &check_any_ph_die, (void *)(ph)))
 		return ;
 	pthread_detach(check_die_th);
@@ -67,30 +86,8 @@ static void	child_proc(t_ph *ph, t_info *info, int ph_i)
 			break ;
 		}
 	}
-	return ;
-}
-
-static void	*check_any_ph_die(void *philo)
-{
-	t_ph	*ph;
-
-	ph = (t_ph *)philo;
-	mod_usleep(ph->info->t_eat, ph->info);
-	while (!ph->info->glob_die_status)
-	{
-		sem_wait(ph->info->die_sem);
-		if (get_time(ph->info) - ph->eat_st_time > ph->info->t_die)
-		{
-			ph->info->glob_die_status = 1;
-			break ;
-		}
-		sem_post(ph->info->die_sem);
-	}
-	sem_wait(ph->info->must_eat_sem);
-	if (ph->info->must_eat_num_success != ph->info->ph_num)
-		printf("%07lld %d died\n", get_time(ph->info), i + 1);
-	sem_post(ph->info->must_eat_sem);
-	return (NULL);
+	printf("	%d\n", info->must_eat_num_success);
+	exit(0);
 }
 
 static void	wait_any_death(pid_t child_pids[200], t_info *info)
@@ -98,10 +95,19 @@ static void	wait_any_death(pid_t child_pids[200], t_info *info)
 	pid_t	term_pid;
 	int		i;
 
+	while (1 && info->must_eat_num)
+	{
+		sem_wait(info->must_eat_sem);
+		if (info->must_eat_num_success == info->ph_num)
+			break ;
+		sem_post(info->must_eat_sem);
+	}
+	printf("musteat: %d\n", info->must_eat_num_success);
 	term_pid = waitpid(-1, NULL, 0);
 	i = -1;
 	if (term_pid > 0)
 	{
+		printf("termpid: %d\n", term_pid);
 		while (++i < info->ph_num)
 			if (child_pids[i] != term_pid)
 				kill(child_pids[i], SIGTERM);
@@ -121,7 +127,6 @@ static void	init_philo(t_ph philo[200], t_info *info)
 
 	init_timestamp(info);
 	init_sem(info);
-	info->glob_die_status = 0;
 	info->must_eat_num_success = 0;
 	i = -1;
 	while (++i < info->ph_num)
@@ -156,10 +161,5 @@ int	main(int ac, char **av)
 		return (0);
 	}
 	init_philo(philo, &info);
-	sem_close(info.forks);
-	sem_close(info.die_sem);
-	sem_close(info.must_eat_sem);
-	sem_unlink("/forks");
-	sem_unlink("/die_sem");
-	sem_unlink("/must_eat_sem");
+	exit_philo(&info);
 }

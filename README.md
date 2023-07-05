@@ -13,5 +13,10 @@ Resources:
 - unix threads in c: https://www.youtube.com/playlist?list=PLfqABt5AS4FmuQf70psXrsMLEDQXNkLq2
 - visualiser: https://nafuka11.github.io/philosophers-visualizer/
 
-## How to Use
-
+Checklist:
+- [ ] Mandatory + Bonus Error Checking
+- [ ] Tests for Mandatory up to 200 
+- [ ] Tests for Mandatory with fsanitize up to 200 
+- [ ] Tests for Bonus up to 200
+- [ ] Tests for Bonus with fsanitize up to 200
+- [ ] Norm
