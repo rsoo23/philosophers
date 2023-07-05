@@ -6,7 +6,7 @@
 /*   By: rsoo <rsoo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/23 20:34:59 by rsoo              #+#    #+#             */
-/*   Updated: 2023/06/29 14:36:09 by rsoo             ###   ########.fr       */
+/*   Updated: 2023/07/05 20:55:48 by rsoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,17 +36,10 @@ int	philo_take_forks(t_ph *ph, t_info *info, int i)
 {
 	pthread_mutex_lock(&info->fork[i]);
 	if (!lock_printf(get_time(info), ph, i, 'f'))
-	{
-		pthread_mutex_unlock(&info->fork[i]);
 		return (0);
-	}
 	pthread_mutex_lock(&info->fork[(i + 1) % info->ph_num]);
 	if (!lock_printf(get_time(info), ph, i, 'f'))
-	{
-		pthread_mutex_unlock(&info->fork[i]);
-		pthread_mutex_unlock(&info->fork[(i + 1) % info->ph_num]);
 		return (0);
-	}
 	return (1);
 }
 

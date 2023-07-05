@@ -46,13 +46,11 @@ static int	check_if_all_digits(char **av)
 	while (av[++i])
 	{
 		j = -1;
+		if (av[i][j] == '-')
+			j++;
 		while (av[i][++j])
-		{
-			if (av[i][j] == '-')
-				j++;
 			if (av[i][j] < '0' || av[i][j] > '9')
 				return (0);
-		}
 	}
 	return (1);
 }

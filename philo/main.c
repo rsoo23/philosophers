@@ -108,16 +108,12 @@ static void	exit_philo(t_ph philo[200], t_info *info)
 
 	i = -1;
 	while (++i < info->ph_num)
-		if (pthread_join(philo[i].th, NULL))
-			return ;
+		pthread_join(philo[i].th, NULL);
 	i = -1;
 	while (++i < info->ph_num)
-		if (pthread_mutex_destroy(&info->fork[i]))
-			return ;
-	if (pthread_mutex_destroy(&info->die_lock))
-		return ;
-	if (pthread_mutex_destroy(&info->must_eat_lock))
-		return ;
+		pthread_mutex_destroy(&info->fork[i]);
+	pthread_mutex_destroy(&info->die_lock);
+	pthread_mutex_destroy(&info->must_eat_lock);
 }
 
 static void	init_philo(t_ph philo[200], t_info *info)
