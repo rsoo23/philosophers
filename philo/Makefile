@@ -12,7 +12,7 @@
 
 NAME = philo
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror 
+CFLAGS = -Wall -Wextra -Werror -fsanitize=address
 #-pthread -fsanitize=thread
 RM = rm -rf
 

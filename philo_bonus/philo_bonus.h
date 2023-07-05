@@ -22,6 +22,7 @@
 // pthread: create, detach, join, mutex_init,
 //  mutex_destroy, mutex_lock, mutex_unlock
 
+#include <fcntl.h>     // O_CREAT
 #include <signal.h>    // kill
 #include <sys/wait.h>  // waitpid
 #include <semaphore.h> // sem_open, sem_close, sem_post, sem_wait, sem_unlink
@@ -43,10 +44,8 @@ typedef struct s_info
 
 typedef struct s_ph
 {
-	pthread_t		th;
 	int				ph_i;
 	int				eat_num;
-	long long		time;
 	long long		eat_st_time;
 	t_info			*info;
 }	t_ph;
@@ -55,15 +54,15 @@ typedef struct s_ph
 int			parse_and_check_input(char **av, t_info *info);
 
 // philo_states.c
-int			philo_take_forks(t_ph *ph, t_info *info, int i);
+int			philo_take_forks(t_info *info, int i);
 int			philo_eat(t_ph *ph, t_info *info, int i);
-int			philo_sleep(t_ph *ph, t_info *info, int i);
-int			philo_think(t_ph *ph, t_info *info, int i);
+int			philo_sleep(t_info *info, int i);
+int			philo_think(t_info *info, int i);
 
 // utils_1.c
-void		*check_any_ph_die(void *philo);
 void		mod_usleep(int duration, t_info *info);
 void		init_timestamp(t_info *info);
 long long	get_time(t_info *info);
+int			init_sem(t_info *info);
 
 #endif

@@ -42,7 +42,6 @@ typedef struct s_ph
 	pthread_t		th;
 	int				ph_i;
 	int				eat_num;
-	long long		time;
 	long long		eat_st_time;
 	t_info			*info;
 }	t_ph;
