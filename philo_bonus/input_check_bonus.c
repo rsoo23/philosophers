@@ -12,7 +12,7 @@
 
 #include "philo_bonus.h"
 
-static long	ft_atoi_long(const char *str)
+static long	ft_atol(const char *str)
 {
 	int		i;
 	long	sign;
@@ -55,21 +55,21 @@ static int	check_if_all_digits(char **av)
 
 static int	get_info_1(char **av, t_info *info, long temp)
 {
-	temp = ft_atoi_long(av[1]);
+	temp = ft_atol(av[1]);
 	if (temp < 1 || temp > 200)
 	{
 		printf("Error: Philosopher Number (1 - 200)\n");
 		return (0);
 	}
 	info->ph_num = (int)temp;
-	temp = ft_atoi_long(av[2]);
+	temp = ft_atol(av[2]);
 	if (temp < 1 || temp > 2147483647)
 	{
 		printf("Error: Time to die\n");
 		return (0);
 	}
 	info->t_die = (int)temp;
-	temp = ft_atoi_long(av[3]);
+	temp = ft_atol(av[3]);
 	if (temp < 1 || temp > 2147483647)
 	{
 		printf("Error: Time to eat\n");
@@ -81,7 +81,7 @@ static int	get_info_1(char **av, t_info *info, long temp)
 
 static int	get_info_2(char **av, t_info *info, long temp)
 {
-	temp = ft_atoi_long(av[4]);
+	temp = ft_atol(av[4]);
 	if (temp < 1 || temp > 2147483647)
 	{
 		printf("Error: Time to sleep\n");
@@ -90,7 +90,7 @@ static int	get_info_2(char **av, t_info *info, long temp)
 	info->t_sleep = (int)temp;
 	if (av[5])
 	{
-		temp = ft_atoi_long(av[5]);
+		temp = ft_atol(av[5]);
 		if (temp < 1 || temp > 2147483647)
 		{
 			printf("Error: Must Eat Number\n");

@@ -12,42 +12,6 @@
 
 #include "philo_bonus.h"
 
-int	init_sem(t_info *info)
-{
-	sem_unlink("/forks");
-	sem_unlink("/die_sem");
-	sem_unlink("/must_eat_sem");
-	info->forks = sem_open("/forks", O_CREAT, 0666, info->ph_num);
-	if (info->forks == SEM_FAILED)
-	{
-		printf("Error: Failed to open semaphore (forks)\n");
-		return (0);
-	}
-	info->die_sem = sem_open("/die_sem", O_CREAT, 0666, 1);
-	if (info->die_sem == SEM_FAILED)
-	{
-		printf("Error: Failed to open semaphore (die_sem)\n");
-		return (0);
-	}
-	info->must_eat_sem = sem_open("/must_eat_sem", O_CREAT, 0666, 1);
-	if (info->must_eat_sem == SEM_FAILED)
-	{
-		printf("Error: Failed to open semaphore (must_eat_sem)\n");
-		return (0);
-	}
-	return (1);
-}
-
-void	exit_philo(t_info *info)
-{
-	sem_close(info->forks);
-	sem_close(info->die_sem);
-	sem_close(info->must_eat_sem);
-	sem_unlink("/forks");
-	sem_unlink("/die_sem");
-	sem_unlink("/must_eat_sem");
-}
-
 void	mod_usleep(int duration, t_info *info)
 {
 	long long	st_time;

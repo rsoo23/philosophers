@@ -27,22 +27,23 @@
 #include <sys/wait.h>  // waitpid
 #include <semaphore.h> // sem_open, sem_close, sem_post, sem_wait, sem_unlink
 
+#define DIED 1
+#define MUST_EAT_DONE 2
+
 typedef struct s_info
 {
 	sem_t			*forks;
-	sem_t			*die_sem;
-	sem_t			*must_eat_sem;
 	int				ph_num;
 	int				t_die;
 	int				t_eat;
 	int				t_sleep;
 	int				must_eat_num;
-	int				must_eat_num_success;
 	long long		st_time;
 }	t_info;
 
 typedef struct s_ph
 {
+	sem_t			*die_sem;
 	int				ph_i;
 	int				eat_num;
 	long long		eat_st_time;
@@ -53,16 +54,14 @@ typedef struct s_ph
 int			parse_and_check_input(char **av, t_info *info);
 
 // philo_states.c
-int			philo_take_forks(t_info *info, int i);
-int			philo_eat(t_ph *ph, t_info *info, int i);
-int			philo_sleep(t_info *info, int i);
-int			philo_think(t_info *info, int i);
+void		philo_take_forks(t_ph *ph, int i);
+void		philo_eat(t_ph *ph, int i);
+void		philo_sleep(t_ph *ph, int i);
+void		philo_think(t_ph *ph, int i);
 
 // utils_1.c
 void		mod_usleep(int duration, t_info *info);
 void		init_timestamp(t_info *info);
 long long	get_time(t_info *info);
-int			init_sem(t_info *info);
-void		exit_philo(t_info *info);
 
 #endif

@@ -32,7 +32,7 @@ typedef struct s_info
 	int				t_eat;
 	int				t_sleep;
 	int				must_eat_num;
-	int				must_eat_num_success;
+	int				must_eat_success;
 	int				glob_die_status;
 	long long		st_time;
 }	t_info;

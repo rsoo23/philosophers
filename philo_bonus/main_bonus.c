@@ -46,22 +46,21 @@ static void	*check_any_ph_die(void *philo)
 	mod_usleep(ph->info->t_eat, ph->info);
 	while (1)
 	{
-		sem_wait(ph->info->die_sem);
+		sem_wait(ph->die_sem);
 		if (get_time(ph->info) - ph->eat_st_time > ph->info->t_die)
 			break ;
-		sem_post(ph->info->die_sem);
+		sem_post(ph->die_sem);
 	}
-	sem_wait(ph->info->must_eat_sem);
-	if (ph->info->must_eat_num_success != ph->info->ph_num)
-		printf("%07lld %d died\n", get_time(ph->info), ph->ph_i + 1);
-	sem_post(ph->info->must_eat_sem);
-	exit(0);
+	printf("%07lld %d died\n", get_time(ph->info), ph->ph_i + 1);
+	exit(DIED);
 }
 
-static void	child_proc(t_ph *ph, t_info *info, int ph_i)
+static void	child_proc(t_ph *ph, int ph_i)
 {
 	pthread_t	check_die_th;
 
+	sem_unlink("/die_sem");
+	ph->die_sem = sem_open("/die_sem", O_CREAT, 0666, 1);
 	ph->eat_num = 0;
 	ph->eat_st_time = 0;
 	ph->ph_i = ph_i;
@@ -70,52 +69,42 @@ static void	child_proc(t_ph *ph, t_info *info, int ph_i)
 	pthread_detach(check_die_th);
 	while (1)
 	{
-		if (!philo_take_forks(info, ph_i))
+		philo_take_forks(ph, ph_i);
+		philo_eat(ph, ph_i);
+		if (ph->info->must_eat_num && ph->info->must_eat_num == ph->eat_num)
 			break ;
-		if (!philo_eat(ph, info, ph_i))
-			break ;
-		if (!philo_sleep(info, ph_i))
-			break ;
-		if (!philo_think(info, ph_i))
-			break ;
-		if (info->must_eat_num && info->must_eat_num == ph->eat_num)
-		{
-			sem_wait(info->must_eat_sem);
-			info->must_eat_num_success++;
-			sem_post(info->must_eat_sem);
-			break ;
-		}
+		philo_sleep(ph, ph_i);
+		philo_think(ph, ph_i);
 	}
-	printf("	%d\n", info->must_eat_num_success);
-	exit(0);
+	sem_close(ph->die_sem);
+	sem_unlink("/die_sem");
+	exit(MUST_EAT_DONE);
 }
 
-static void	wait_any_death(pid_t child_pids[200], t_info *info)
+static void	wait_for_child_proc(pid_t child_pids[200], t_info *info)
 {
 	pid_t	term_pid;
 	int		i;
+	int		status;
+	int		must_eat_success;
 
-	while (1 && info->must_eat_num)
+	must_eat_success = 0;
+	while (must_eat_success < info->ph_num)
 	{
-		sem_wait(info->must_eat_sem);
-		if (info->must_eat_num_success == info->ph_num)
-			break ;
-		sem_post(info->must_eat_sem);
-	}
-	printf("musteat: %d\n", info->must_eat_num_success);
-	term_pid = waitpid(-1, NULL, 0);
-	i = -1;
-	if (term_pid > 0)
-	{
-		printf("termpid: %d\n", term_pid);
-		while (++i < info->ph_num)
-			if (child_pids[i] != term_pid)
-				kill(child_pids[i], SIGTERM);
-	}
-	else if (term_pid < 0)
-	{
-		printf("Error: terminating pid\n");
-		return ;
+		// write(1, "wait\n", 5);
+		// printf("%d\n", must_eat_success);
+		term_pid = waitpid(-1, &status, 0);
+		if (WEXITSTATUS(status) == DIED)
+		{
+			i = -1;
+			while (++i < info->ph_num)
+				if (child_pids[i] != term_pid)
+					kill(child_pids[i], SIGTERM);
+			return ;
+		}
+		else if (WEXITSTATUS(status) == MUST_EAT_DONE)
+			must_eat_success++;
+		// printf("	%d\n", must_eat_success);
 	}
 }
 
@@ -126,8 +115,8 @@ static void	init_philo(t_ph philo[200], t_info *info)
 	int		i;
 
 	init_timestamp(info);
-	init_sem(info);
-	info->must_eat_num_success = 0;
+	sem_unlink("/forks");
+	info->forks = sem_open("/forks", O_CREAT, 0666, info->ph_num);
 	i = -1;
 	while (++i < info->ph_num)
 	{
@@ -139,10 +128,10 @@ static void	init_philo(t_ph philo[200], t_info *info)
 			exit(EXIT_FAILURE);
 		}
 		else if (pid == 0)
-			child_proc(&philo[i], info, i);
+			child_proc(&philo[i], i);
 		child_pids[i] = pid;
 	}
-	wait_any_death(child_pids, info);
+	wait_for_child_proc(child_pids, info);
 }
 
 int	main(int ac, char **av)
@@ -161,5 +150,6 @@ int	main(int ac, char **av)
 		return (0);
 	}
 	init_philo(philo, &info);
-	exit_philo(&info);
+	sem_close(info.forks);
+	sem_unlink("/forks");
 }

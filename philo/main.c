@@ -69,7 +69,7 @@ static void	*routine(void *philo)
 		if (ph->info->must_eat_num && ph->info->must_eat_num == ph->eat_num)
 		{
 			pthread_mutex_lock(&ph->info->must_eat_lock);
-			ph->info->must_eat_num_success++;
+			ph->info->must_eat_success++;
 			pthread_mutex_unlock(&ph->info->must_eat_lock);
 			break ;
 		}
@@ -97,7 +97,7 @@ static void	check_any_ph_die(t_ph philo[200], t_info *info)
 		pthread_mutex_unlock(&info->die_lock);
 	}
 	pthread_mutex_lock(&info->must_eat_lock);
-	if (info->must_eat_num_success != info->ph_num)
+	if (info->must_eat_success != info->ph_num)
 		printf("%07lld %d died\n", get_time(info), i + 1);
 	pthread_mutex_unlock(&info->must_eat_lock);
 }
@@ -126,7 +126,7 @@ static void	init_philo(t_ph philo[200], t_info *info)
 
 	i = -1;
 	info->glob_die_status = 0;
-	info->must_eat_num_success = 0;
+	info->must_eat_success = 0;
 	init_timestamp(info);
 	if (pthread_mutex_init(&info->die_lock, NULL))
 		return ;

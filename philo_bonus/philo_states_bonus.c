@@ -6,15 +6,15 @@
 /*   By: rsoo <rsoo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/30 08:55:21 by rsoo              #+#    #+#             */
-/*   Updated: 2023/07/05 10:32:19 by rsoo             ###   ########.fr       */
+/*   Updated: 2023/07/05 16:14:45 by rsoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
 
-static int	lock_printf(long long time, t_info *info, int i, char c)
+static void	lock_printf(long long time, t_ph *ph, int i, char c)
 {
-	sem_wait(info->die_sem);
+	sem_wait(ph->die_sem);
 	if (c == 'f')
 		printf("%07lld %d has taken a fork\n", time, i + 1);
 	else if (c == 'e')
@@ -23,54 +23,37 @@ static int	lock_printf(long long time, t_info *info, int i, char c)
 		printf("%07lld %d is sleeping\n", time, i + 1);
 	else if (c == 't')
 		printf("%07lld %d is thinking\n", time, i + 1);
-	sem_post(info->die_sem);
-	return (1);
+	sem_post(ph->die_sem);
 }
 
-int	philo_take_forks(t_info *info, int i)
+void	philo_take_forks(t_ph *ph, int i)
 {
-	sem_wait(info->forks);
-	if (!lock_printf(get_time(info), info, i, 'f'))
-	{
-		sem_post(info->forks);
-		return (0);
-	}
-	sem_wait(info->forks);
-	if (!lock_printf(get_time(info), info, i, 'f'))
-	{
-		sem_post(info->forks);
-		sem_post(info->forks);
-		return (0);
-	}
-	return (1);
+	sem_wait(ph->info->forks);
+	lock_printf(get_time(ph->info), ph, i, 'f');
+	sem_wait(ph->info->forks);
+	lock_printf(get_time(ph->info), ph, i, 'f');
 }
 
-int	philo_eat(t_ph *ph, t_info *info, int i)
+void	philo_eat(t_ph *ph, int i)
 {
-	sem_wait(info->die_sem);
-	ph->eat_st_time = get_time(info);
-	sem_post(info->die_sem);
-	if (!lock_printf(ph->eat_st_time, info, i, 'e'))
-		return (0);
-	mod_usleep(info->t_eat, info);
-	if (info->must_eat_num)
+	sem_wait(ph->die_sem);
+	ph->eat_st_time = get_time(ph->info);
+	sem_post(ph->die_sem);
+	lock_printf(ph->eat_st_time, ph, i, 'e');
+	mod_usleep(ph->info->t_eat, ph->info);
+	if (ph->info->must_eat_num)
 		ph->eat_num++;
-	sem_post(info->forks);
-	sem_post(info->forks);
-	return (1);
+	sem_post(ph->info->forks);
+	sem_post(ph->info->forks);
 }
 
-int	philo_sleep(t_info *info, int i)
+void	philo_sleep(t_ph *ph, int i)
 {
-	if (!lock_printf(get_time(info), info, i, 's'))
-		return (0);
-	mod_usleep(info->t_sleep, info);
-	return (1);
+	lock_printf(get_time(ph->info), ph, i, 's');
+	mod_usleep(ph->info->t_sleep, ph->info);
 }
 
-int	philo_think(t_info *info, int i)
+void	philo_think(t_ph *ph, int i)
 {
-	if (!lock_printf(get_time(info), info, i, 't'))
-		return (0);
-	return (1);
+	lock_printf(get_time(ph->info), ph, i, 't');
 }
