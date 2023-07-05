@@ -46,11 +46,13 @@ static void	*check_any_ph_die(void *philo)
 	mod_usleep(ph->info->t_eat, ph->info);
 	while (1)
 	{
-		sem_wait(ph->die_sem);
+		sem_wait(ph->loc_die_sem);
 		if (get_time(ph->info) - ph->eat_st_time > ph->info->t_die)
 			break ;
-		sem_post(ph->die_sem);
+		sem_post(ph->loc_die_sem);
+		mod_usleep(1, ph->info);
 	}
+	sem_wait(ph->info->glob_die_sem);
 	printf("%07lld %d died\n", get_time(ph->info), ph->ph_i + 1);
 	exit(DIED);
 }
@@ -59,8 +61,8 @@ static void	child_proc(t_ph *ph, int ph_i)
 {
 	pthread_t	check_die_th;
 
-	sem_unlink("/die_sem");
-	ph->die_sem = sem_open("/die_sem", O_CREAT, 0666, 1);
+	sem_unlink("/loc_die_sem");
+	ph->loc_die_sem = sem_open("/loc_die_sem", O_CREAT, 0666, 1);
 	ph->eat_num = 0;
 	ph->eat_st_time = 0;
 	ph->ph_i = ph_i;
@@ -76,8 +78,8 @@ static void	child_proc(t_ph *ph, int ph_i)
 		philo_sleep(ph, ph_i);
 		philo_think(ph, ph_i);
 	}
-	sem_close(ph->die_sem);
-	sem_unlink("/die_sem");
+	sem_close(ph->loc_die_sem);
+	sem_unlink("/loc_die_sem");
 	exit(MUST_EAT_DONE);
 }
 
@@ -91,8 +93,6 @@ static void	wait_for_child_proc(pid_t child_pids[200], t_info *info)
 	must_eat_success = 0;
 	while (must_eat_success < info->ph_num)
 	{
-		// write(1, "wait\n", 5);
-		// printf("%d\n", must_eat_success);
 		term_pid = waitpid(-1, &status, 0);
 		if (WEXITSTATUS(status) == DIED)
 		{
@@ -104,7 +104,6 @@ static void	wait_for_child_proc(pid_t child_pids[200], t_info *info)
 		}
 		else if (WEXITSTATUS(status) == MUST_EAT_DONE)
 			must_eat_success++;
-		// printf("	%d\n", must_eat_success);
 	}
 }
 
@@ -115,8 +114,6 @@ static void	init_philo(t_ph philo[200], t_info *info)
 	int		i;
 
 	init_timestamp(info);
-	sem_unlink("/forks");
-	info->forks = sem_open("/forks", O_CREAT, 0666, info->ph_num);
 	i = -1;
 	while (++i < info->ph_num)
 	{
@@ -149,7 +146,7 @@ int	main(int ac, char **av)
 		printf("%07lld %d died\n", (long long)0, 1);
 		return (0);
 	}
+	init_sem(&info);
 	init_philo(philo, &info);
-	sem_close(info.forks);
-	sem_unlink("/forks");
+	close_sem(&info);
 }

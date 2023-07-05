@@ -12,14 +12,14 @@
 
 NAME = philo_bonus
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror #-pthread -fsanitize=thread -g3
+CFLAGS = -Wall -Wextra -Werror -g3 -pthread -fsanitize=thread
 RM = rm -rf
 
 SRCS = main_bonus input_check_bonus utils_1_bonus philo_states_bonus
 SRCS_CFILES = $(addsuffix .c, $(SRCS))
 OBJS = $(SRCS_CFILES:.c=.o)
 
-%.o: %.c
+%.o: %.c ./Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
 
 all: $(NAME)

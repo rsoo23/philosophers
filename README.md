@@ -14,9 +14,12 @@ Resources:
 - visualiser: https://nafuka11.github.io/philosophers-visualizer/
 
 Checklist:
-- [ ] Mandatory + Bonus Error Checking
-- [ ] Tests for Mandatory up to 200 
-- [ ] Tests for Mandatory with fsanitize up to 200 
+- [x] Mandatory Error Checking
+- [x] Tests for Mandatory up to 200
+- [x] Tests for Mandatory with fsanitize up to 200 
+- [x] Mandatory Norm
+
+- [x] Bonus Error Checking
 - [ ] Tests for Bonus up to 200
 - [ ] Tests for Bonus with fsanitize up to 200
-- [ ] Norm
+- [x] Bonus Norm

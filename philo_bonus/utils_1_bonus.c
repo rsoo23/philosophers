@@ -12,6 +12,22 @@
 
 #include "philo_bonus.h"
 
+void	init_sem(t_info *info)
+{
+	sem_unlink("/forks");
+	info->forks = sem_open("/forks", O_CREAT, 0666, info->ph_num);
+	sem_unlink("/glob_die_sem");
+	info->glob_die_sem = sem_open("/glob_die_sem", O_CREAT, 0666, 1);
+}
+
+void	close_sem(t_info *info)
+{
+	sem_close(info->forks);
+	sem_unlink("/forks");
+	sem_close(info->glob_die_sem);
+	sem_unlink("/glob_die_sem");
+}
+
 void	mod_usleep(int duration, t_info *info)
 {
 	long long	st_time;
