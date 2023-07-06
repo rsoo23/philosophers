@@ -41,7 +41,7 @@ void	init_timestamp(t_info *info)
 {
 	struct timeval	start;
 
-	gettimeofday(&(start), NULL);
+	gettimeofday(&start, NULL);
 	info->st_time = (long long)start.tv_sec * 1000 + start.tv_usec / 1000;
 }
 
