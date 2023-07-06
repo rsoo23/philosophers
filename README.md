@@ -20,6 +20,6 @@ Checklist:
 - [x] Mandatory Norm
 
 - [x] Bonus Error Checking
-- [ ] Tests for Bonus up to 200
-- [ ] Tests for Bonus with fsanitize up to 200
+- [x] Tests for Bonus up to 200
+- [x] Tests for Bonus with fsanitize up to 200
 - [x] Bonus Norm
