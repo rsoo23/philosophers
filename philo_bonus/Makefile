@@ -12,7 +12,8 @@
 
 NAME = philo_bonus
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -g3 -pthread -fsanitize=thread
+CFLAGS = -Wall -Wextra -Werror -g3 
+#-pthread -fsanitize=thread
 RM = rm -rf
 
 SRCS = main_bonus input_check_bonus philo_states_bonus utils_1_bonus utils_2_bonus
