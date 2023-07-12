@@ -45,6 +45,7 @@ typedef struct s_info
 typedef struct s_ph
 {
 	sem_t			*loc_die_sem;
+	char			*loc_die_sem_name;
 	int				ph_i;
 	int				eat_num;
 	long long		eat_st_time;
@@ -66,5 +67,9 @@ void		close_sem(t_info *info);
 void		mod_usleep(int duration, t_info *info);
 void		init_timestamp(t_info *info);
 long long	get_time(t_info *info);
+
+// utils_2_bonus.c
+void		init_loc_die_sem(t_ph *ph);
+void		close_loc_die_sem(t_ph *ph);
 
 #endif

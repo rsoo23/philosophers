@@ -61,13 +61,11 @@ static void	child_proc(t_ph *ph, int ph_i)
 {
 	pthread_t	check_die_th;
 
-	sem_unlink("/loc_die_sem");
-	ph->loc_die_sem = sem_open("/loc_die_sem", O_CREAT, 0666, 1);
+	init_loc_die_sem(ph);
 	ph->eat_num = 0;
-	ph->eat_st_time = 0;
 	ph->ph_i = ph_i;
-	if (pthread_create(&check_die_th, NULL, &check_any_ph_die, (void *)(ph)))
-		return ;
+	ph->eat_st_time = 0;
+	pthread_create(&check_die_th, NULL, &check_any_ph_die, (void *)ph);
 	pthread_detach(check_die_th);
 	while (1)
 	{
@@ -78,8 +76,7 @@ static void	child_proc(t_ph *ph, int ph_i)
 		philo_sleep(ph, ph_i);
 		philo_think(ph, ph_i);
 	}
-	sem_close(ph->loc_die_sem);
-	sem_unlink("/loc_die_sem");
+	close_loc_die_sem(ph);
 	exit(MUST_EAT_DONE);
 }
 
